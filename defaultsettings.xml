@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+    Document   : default_settings.xml
+    Created on : 12 avril 2011, 18:38
+    Author     : souley
+    Description:
+        Purpose of the document follows.
+-->
+<ct2i>
+<application>
+    <runmode>user</runmode>
+    <outbuffer>.ct2i\\data</outbuffer>
+    <inbuffer>.ct2i\\data</inbuffer>
+</application>
+<cluster>
+    <errorfile>test.err</errorfile>
+    <binarypath>/home/souley/omnimatch/bin</binarypath>
+    <hostname>lisa.sara.nl</hostname>
+    <outputpath>/home/souley/omnimatch/output</outputpath>
+    <walltime>00:05:00</walltime>
+    <user>souley</user>
+    <inputpath>/home/souley/omnimatch/input</inputpath>
+    <gpusorcpus>1</gpusorcpus>
+    <logfile>test.log</logfile>
+    <nodes>2</nodes>
+    <queue>q_gpu</queue>
+</cluster>
+<omnimatch>
+    <binary file="omnimatch.seq">
+      <geomx>250</geomx>
+      <geomy>110</geomy>  
+    </binary>
+    <tomogram file="tomogram2.em">
+      <geomx>20</geomx>
+      <geomy>60</geomy>
+    </tomogram>
+    <template file="template.em">
+      <geomx>20</geomx>
+      <geomy>140</geomy>
+    </template>
+    <mask file="mask.em">
+      <geomx>20</geomx>
+      <geomy>220</geomy>
+    </mask>
+    <psf file="psf.em">
+      <geomx>20</geomx>
+      <geomy>300</geomy>
+    </psf>
+    <fourier>
+      <value>128</value>
+      <geomx>280</geomx>
+      <geomy>350</geomy>
+    </fourier>
+    <output>
+      <value>output01</value>
+      <geomx>390</geomx>
+      <geomy>350</geomy>
+    </output>
+    <phi>
+      <start>0</start>
+      <end>179</end>
+      <inc>30</inc>
+      <geomx>230</geomx>
+      <geomy>10</geomy>
+    </phi>
+    <psi>
+      <start>0</start>
+      <end>179</end>
+      <inc>30</inc>
+      <geomx>340</geomx>
+      <geomy>10</geomy>
+    </psi>
+    <theta>
+      <start>0</start>
+      <end>179</end>
+      <inc>30</inc>
+      <geomx>450</geomx>
+      <geomy>10</geomy>
+    </theta>
+    <ccf>
+      <geomx>630</geomx>
+      <geomy>140</geomy>
+    </ccf>
+    <angles>
+      <geomx>630</geomx>
+      <geomy>220</geomy>
+    </angles>
+  </omnimatch>
+<database>
+    <url>phlmBt2E4i+/6RikqPaaP4XjLoMMXr+6EJDZuO/cfLUyZKcWX4Ak1GOKDnVI2fs6kzXML8eFwms=&#13;
+    </url>
+    <user>JFUuyKJT1Ls=&#13;
+    </user>
+    <pwd>nZi7eDcAm2c=&#13;
+    </pwd>
+</database>
+</ct2i>
