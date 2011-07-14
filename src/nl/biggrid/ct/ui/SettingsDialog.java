@@ -30,17 +30,15 @@ import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.builder.ButtonBarBuilder2;
 import com.jgoodies.forms.layout.FormLayout;
 
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.HashMap;
 import nl.biggrid.ct.run.*;
 import nl.biggrid.ct.util.MessageBox;
 
 public class SettingsDialog extends JDialog
-        implements ActionListener, ItemListener {
+        implements ActionListener {
 
-    final String CONFIG_DIR = File.separator + "config" + File.separator;
+    //final String CONFIG_DIR = File.separator + "config" + File.separator;
     final String CONFIG_FILE = "defaultsettings.xml";
     final String TWO_DIGIT_FORMAT = "%02d";
     public final String WMS_PBS = "PBS";
@@ -50,10 +48,8 @@ public class SettingsDialog extends JDialog
     final String CURRENT_DIR = System.getProperty("user.dir");
     final String USER_CT2I = CURRENT_DIR + File.separator + ".ct2i";
     final String DEFAULT_BUFFER = USER_CT2I + File.separator + "data";
-    final String DEFAULT_OUTBUFFER = DEFAULT_BUFFER + File.separator + "outbound";
-    final String DEFAULT_INBUFFER = DEFAULT_BUFFER + File.separator + "inbound";
-    final String SCRIPT_PATH = CURRENT_DIR + CONFIG_DIR + "scripts" + File.separator;
-    final String BIN_PATH = CURRENT_DIR + CONFIG_DIR + "bin";
+    final String SCRIPT_PATH = ConfigManager.CONFIG_DIR + "scripts" + File.separator;
+    final String BIN_PATH = ConfigManager.CONFIG_DIR + "bin";
 
     private boolean checkingPassed;
     private ConfigChecker checker = null;
@@ -78,7 +74,6 @@ public class SettingsDialog extends JDialog
         jbCancel.addActionListener(this);
         jpflPwd.addActionListener(this);
         checkingPassed = false;
-        //ct2iKnown = (new File(USER_CT2I)).isDirectory();
         initSettings();
     }
 
@@ -99,23 +94,19 @@ public class SettingsDialog extends JDialog
     }
 
     public String getToolPath() {
-        return jtflTool.getText();
+        return jtflOmniHome.getText()+"/"+jtflTool.getText();
     }
 
     public String getInputPath() {
-        return jtflIndir.getText();
+        return jtflOmniHome.getText()+"/"+jtflIndir.getText();
     }
 
     public String getOutputPath() {
-        return jtflOutdir.getText();
+        return jtflOmniHome.getText()+"/"+jtflOutdir.getText();
     }
 
-    public String getOutBufferPath() {
-        return jtflOutBuffer.getText();
-    }
-
-    public String getInBufferPath() {
-        return jtflInBuffer.getText();
+    public String getTransferBufferPath() {
+        return jtflTransferBuffer.getText();
     }
 
     public String getWallTime() {
@@ -212,31 +203,15 @@ public class SettingsDialog extends JDialog
     boolean checkSettings() {
         String host = jtflHost.getText();
         String login = jtflLogin.getText();
+        //System.out.println("### PWD="+new String(jpflPwd.getPassword()));
         String pwd = new String(jpflPwd.getPassword());
-        String toolPath = jtflTool.getText();
-        String inputPath = jtflIndir.getText();
-        String outputPath = jtflOutdir.getText();
-        String outBufferPath = jtflOutBuffer.getText();
-        String inBufferPath = jtflInBuffer.getText();
-        //String jobPath = jtflOmniHome.getText();
-        //String jobPath = "";
-        //String remoteJobFile = "";
+        String toolPath = jtflOmniHome.getText()+"/"+jtflTool.getText();
+        String inputPath = jtflOmniHome.getText()+"/"+jtflIndir.getText();
+        String outputPath = jtflOmniHome.getText()+"/"+jtflOutdir.getText();
+        String transferBufferPath = jtflTransferBuffer.getText();
         String jobPath = getJobPath();
-//        String selectedWMS = (String) jcbWMSChoices.getSelectedItem();
-//        String defaultJobFile = SCRIPT_PATH;
-//        if (selectedWMS.equalsIgnoreCase(WMS_PBS)) {
-//            jobPath += "/" + RunManager.PBS_JOB_SCRIPT;
-//            defaultJobFile += RunManager.PBS_JOB_SCRIPT;
-//        } else if (selectedWMS.equalsIgnoreCase(WMS_SGE)) {
-//            jobPath += "/" + RunManager.SGE_JOB_SCRIPT;
-//            defaultJobFile += RunManager.SGE_JOB_SCRIPT;
-//        } else {
-//            jobPath += "/" + RunManager.LSF_JOB_SCRIPT;
-//            defaultJobFile += RunManager.LSF_JOB_SCRIPT;
-//        }
-
         
-        checker = new ConfigChecker(host, login, pwd, toolPath, inputPath, outputPath, jobPath, outBufferPath, inBufferPath);
+        checker = new ConfigChecker(host, login, pwd, toolPath, inputPath, outputPath, jobPath, transferBufferPath);
         String checkMsg = checker.checkToolPath();
         if (!checkMsg.isEmpty()) {
             String createMsg = checker.createDirectory(toolPath);
@@ -270,17 +245,9 @@ public class SettingsDialog extends JDialog
                 return false;
             }
         }
-        checkMsg = checkBufferPath(outBufferPath);
+        checkMsg = checkBufferPath(transferBufferPath);
         if (!checkMsg.isEmpty()) {
-            String createMsg = createLocalDirectory(outBufferPath);
-            if (!createMsg.isEmpty()) {
-                MessageBox.showErrorMsg(appFrame, checkMsg+" <br> "+createMsg);
-                return false;
-            }
-        }
-        checkMsg = checkBufferPath(inBufferPath);
-        if (!checkMsg.isEmpty()) {
-            String createMsg = createLocalDirectory(inBufferPath);
+            String createMsg = createLocalDirectory(transferBufferPath);
             if (!createMsg.isEmpty()) {
                 MessageBox.showErrorMsg(appFrame, checkMsg+" <br> "+createMsg);
                 return false;
@@ -303,13 +270,9 @@ public class SettingsDialog extends JDialog
         jtflTool.setText(configManager.getString("cluster.binarypath"));
         jtflIndir.setText(configManager.getString("cluster.inputpath"));
         jtflOutdir.setText(configManager.getString("cluster.outputpath"));
-        jtflOutBuffer.setText(configManager.getString("application.outbuffer"));
-        if (jtflOutBuffer.getText().isEmpty()) {
-            jtflOutBuffer.setText(DEFAULT_OUTBUFFER);
-        }
-        jtflInBuffer.setText(configManager.getString("application.inbuffer"));
-        if (jtflInBuffer.getText().isEmpty()) {
-            jtflInBuffer.setText(DEFAULT_INBUFFER);
+        jtflTransferBuffer.setText(configManager.getString("application.transferbuffer"));
+        if (jtflTransferBuffer.getText().isEmpty()) {
+            jtflTransferBuffer.setText(DEFAULT_BUFFER);
         }
         jtflOmniHome.setText("/home/"+jtflLogin.getText()+"/omnimatch");
         wallTime = configManager.getString("cluster.walltime");
@@ -325,8 +288,7 @@ public class SettingsDialog extends JDialog
         configManager.setProperty("cluster.binarypath", jtflTool.getText());
         configManager.setProperty("cluster.inputpath", jtflIndir.getText());
         configManager.setProperty("cluster.outputpath", jtflOutdir.getText());
-        configManager.setProperty("application.outbuffer", jtflOutBuffer.getText());
-        configManager.setProperty("application.inbuffer", jtflInBuffer.getText());
+        configManager.setProperty("application.transferbuffer", jtflTransferBuffer.getText());
         configManager.setProperty("cluster.walltime", wallTime);
         configManager.setProperty("cluster.nodes", numberOfNodes);
         configManager.setProperty("cluster.gpusorcpus", cpuPerNode);
@@ -363,7 +325,7 @@ public class SettingsDialog extends JDialog
     }
 
     public void createRunSubDir() {
-        createDirectory(jtflOutdir.getText() + "/" + runSubDir);
+        createDirectory(jtflOmniHome.getText()+ "/" + jtflOutdir.getText() + "/" + runSubDir);
     }
 
     void goAhead() {
@@ -372,6 +334,10 @@ public class SettingsDialog extends JDialog
             closeWindow();
             appFrame.initWindow();
         }
+    }
+
+    public String checkFileArgs(final HashMap<String, TomoEntity> entityMap) {
+        return checker.checkFileArgs(entityMap);
     }
 
     public void actionPerformed(ActionEvent event) {
@@ -384,35 +350,6 @@ public class SettingsDialog extends JDialog
         }
     }
 
-    public void itemStateChanged(ItemEvent e) {
-//        if (jhbUseDefaults.equals(e.getItem())) {
-//            if (jhbUseDefaults.isSelected()) {
-//                String duuh = "/home/" + jtflLogin.getText() + "/omnimatch/";
-//                jtflTool.setText(duuh + "bin");
-//                jtflIndir.setText(duuh + "input");
-//                jtflOutdir.setText(duuh + "output");
-//                jtflOutBuffer.setText(DEFAULT_OUTBUFFER);
-//                jtflInBuffer.setText(DEFAULT_INBUFFER);
-//                jtflTool.setEnabled(false);
-//                jtflIndir.setEnabled(false);
-//                jtflOutdir.setEnabled(false);
-//                jtflOutBuffer.setEnabled(false);
-//                jtflInBuffer.setEnabled(false);
-//            } else {
-//                jtflTool.setText(configManager.getString("cluster.binarypath"));
-//                jtflIndir.setText(configManager.getString("cluster.inputpath"));
-//                jtflOutdir.setText(configManager.getString("cluster.outputpath"));
-//                jtflOutBuffer.setText(configManager.getString("application.outbuffer"));
-//                jtflInBuffer.setText(configManager.getString("application.inbuffer"));
-//                jtflTool.setEnabled(true);
-//                jtflIndir.setEnabled(true);
-//                jtflOutdir.setEnabled(true);
-//                jtflOutBuffer.setEnabled(true);
-//                jtflInBuffer.setEnabled(true);
-//            }
-//        }
-    }
-
     private void buildGUI() {
         jtflHost = new javax.swing.JTextField(15);
         jtflLogin = new javax.swing.JTextField(15);
@@ -420,13 +357,10 @@ public class SettingsDialog extends JDialog
         jtflTool = new javax.swing.JTextField(50);
         jtflIndir = new javax.swing.JTextField(50);
         jtflOutdir = new javax.swing.JTextField(50);
-        jtflOutBuffer = new javax.swing.JTextField(50);
-        jtflInBuffer = new javax.swing.JTextField(50);
+        jtflTransferBuffer = new javax.swing.JTextField(50);
         jbOk = new javax.swing.JButton("OK");
         jbCancel = new javax.swing.JButton("Cancel");
         jcbWMSChoices = new javax.swing.JComboBox(WMS);
-        //jhbUseDefaults = new javax.swing.JCheckBox("Use Defaults", false);
-        //jhbUseDefaults.addItemListener(this);
         jtflOmniHome = new javax.swing.JTextField();
 
         setContentPane(buildContentPane());
@@ -445,7 +379,7 @@ public class SettingsDialog extends JDialog
         FormLayout layout = new FormLayout(
                 "fill:60dlu:grow, 5dlu, pref, 10dlu, pref," +
                 "$lcgap, pref, $lcgap, pref",
-                "p, 5dlu, p, 5dlu, p, 10dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 10dlu, p, 5dlu, p, 5dlu, p");
+                "p, 5dlu, p, 5dlu, p, 10dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 10dlu, p, 5dlu, p");
         PanelBuilder builder = new PanelBuilder(layout);
 
         builder.setDefaultDialogBorder();
@@ -464,21 +398,18 @@ public class SettingsDialog extends JDialog
         builder.addSeparator("Remote Execution Environment", cc.xyw(1, 7, 7));
         builder.addLabel("WMS", cc.xy(1, 9));
         builder.add(jcbWMSChoices, cc.xy(3, 9));
-        //builder.add(jhbUseDefaults, cc.xy(7, 9));
-        builder.addLabel("Install Path", cc.xy(5, 9));
+        builder.addLabel("OMNI HOME", cc.xy(5, 9));
         builder.add(jtflOmniHome, cc.xy(7, 9));
-        builder.addLabel("Binary Directory", cc.xy(1, 11));
+        builder.addLabel("Binary Subdir", cc.xy(1, 11));
         builder.add(jtflTool, cc.xyw(3, 11, 5));
-        builder.addLabel("Input Directory", cc.xy(1, 13));
+        builder.addLabel("Input Subdir", cc.xy(1, 13));
         builder.add(jtflIndir, cc.xyw(3, 13, 5));
-        builder.addLabel("Output Directory", cc.xy(1, 15));
+        builder.addLabel("Output Subir", cc.xy(1, 15));
         builder.add(jtflOutdir, cc.xyw(3, 15, 5));
 
         builder.addSeparator("Local Settings", cc.xyw(1, 17, 7));
-        builder.addLabel("Outgoing buffer", cc.xy(1, 19));
-        builder.add(jtflOutBuffer, cc.xyw(3, 19, 5));
-        builder.addLabel("Incoming buffer", cc.xy(1, 21));
-        builder.add(jtflInBuffer, cc.xyw(3, 21, 5));
+        builder.addLabel("Transfer buffer", cc.xy(1, 19));
+        builder.add(jtflTransferBuffer, cc.xyw(3, 19, 5));
 
         JPanel panel = builder.getPanel();
         panel.setOpaque(false);
@@ -507,20 +438,15 @@ public class SettingsDialog extends JDialog
         return new ImageIcon(url);
     }
 
-    public String checkFileArgs(final HashMap<String, TomoEntity> entityMap) {
-        return checker.checkFileArgs(entityMap);
-    }
     private javax.swing.JButton jbCancel;
     private javax.swing.JButton jbOk;
     private javax.swing.JPasswordField jpflPwd;
     private javax.swing.JTextField jtflHost;
     private javax.swing.JTextField jtflIndir;
-    private javax.swing.JTextField jtflOutBuffer;
-    private javax.swing.JTextField jtflInBuffer;
+    private javax.swing.JTextField jtflTransferBuffer;
     private javax.swing.JTextField jtflLogin;
     private javax.swing.JTextField jtflOutdir;
     private javax.swing.JTextField jtflTool;
     private javax.swing.JComboBox jcbWMSChoices;
-    private javax.swing.JCheckBox jhbUseDefaults;
     private javax.swing.JTextField jtflOmniHome;
 }

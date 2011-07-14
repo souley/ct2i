@@ -23,6 +23,7 @@ import com.mindbright.ssh2.SSH2ConsoleRemote;
 import java.io.File;
 import nl.biggrid.ct.ui.ParamFileEntity;
 import nl.biggrid.ct.ui.TomoEntity;
+import nl.biggrid.ct.ui.ProcessEntity;
 
 public class ConfigChecker {
     static int BUFFER_SIZE = 1024;
@@ -35,8 +36,7 @@ public class ConfigChecker {
     private String inputPath;
     private String outputPath;
     private String jobPath;
-    private String outBufferPath;
-    private String inBufferPath;
+    private String transferBufferPath;
 
     public ConfigChecker(final String host,
                     final String login,
@@ -45,8 +45,7 @@ public class ConfigChecker {
                     final String inputPath,
                     final String outputPath,
                     final String jobPath,
-                    final String outBufferPath,
-                    final String inBufferPath
+                    final String transferBufferPath
                     ) {
         this.host = host;
         this.login = login;
@@ -55,9 +54,7 @@ public class ConfigChecker {
         this.inputPath = inputPath;
         this.outputPath = outputPath;
         this.jobPath = jobPath;
-        this.outBufferPath = outBufferPath;
-        this.inBufferPath = inBufferPath;
-
+        this.transferBufferPath = transferBufferPath;
         FileTransferManager.instance().init(host, login, pwd);
     }
 
@@ -92,11 +89,9 @@ public class ConfigChecker {
             } else {
                 System.err.println("failed to execute command: " + cmd);
             }
-
             client.getTransport().normalDisconnect("User disconnects");
         } catch(Exception e){
             outputBuffer = outputBuffer.append(e.getMessage());
-            //e.printStackTrace();
         }
         return outputBuffer.toString();
     }
@@ -145,26 +140,27 @@ public class ConfigChecker {
         String checkOutput = "";
         TomoEntity tomo = entityMap.get("tomogram");
         if (tomo != null) {
-            //checkOutput += checkFile((inputPath + "/" + ((ParamFileEntity) tomo).getURL()));
             checkOutput += moveFileToIf(((ParamFileEntity) tomo).getURL());
         }
         tomo = entityMap.get("template");
         if (tomo != null) {
             if (!checkOutput.isEmpty()) checkOutput += "<br>";
-            //checkOutput += checkFile((inputPath + "/" + ((ParamFileEntity) tomo).getURL()));
             checkOutput += moveFileToIf(((ParamFileEntity) tomo).getURL());
         }
         tomo = entityMap.get("psf");
         if (tomo != null) {
             if (!checkOutput.isEmpty()) checkOutput += "<br>";
-            //checkOutput += checkFile((inputPath + "/" + ((ParamFileEntity) tomo).getURL()));
             checkOutput += moveFileToIf(((ParamFileEntity) tomo).getURL());
         }
         tomo = entityMap.get("mask");
         if (tomo != null) {
             if (!checkOutput.isEmpty()) checkOutput += "<br>";
-            //checkOutput += checkFile((inputPath + "/" + ((ParamFileEntity) tomo).getURL()));
             checkOutput += moveFileToIf(((ParamFileEntity) tomo).getURL());
+        }
+        tomo = entityMap.get("omnimatch");
+        if (tomo != null) {
+            if (!checkOutput.isEmpty()) checkOutput += "<br>";
+            checkOutput += moveBinToIf(((ProcessEntity) tomo).getCommand());
         }
         return checkOutput;
     }
@@ -179,12 +175,10 @@ public class ConfigChecker {
 
     String moveFileToIf(final String inputFile) {
         String result = "";
-        //ConfigManager configManager = ConfigManager.instance();
-        //String inputFile = configManager.getString(key);
         String remoteFile = inputPath + "/" + inputFile;
         String checkMsg = checkFile(remoteFile);
         if (!checkMsg.isEmpty()) {
-            String localFile = outBufferPath + File.separator + inputFile;
+            String localFile = transferBufferPath + File.separator + inputFile;
             if ((new File(localFile)).isFile()) {
                 if (!moveFileTo(localFile, remoteFile)) {
                     result += (checkMsg + " and cannot transfer file '" + localFile +"'<br>");
@@ -193,6 +187,25 @@ public class ConfigChecker {
                 result += (checkMsg + " and cannot find file '" + localFile +"'<br>");
             }
         }
+        return result;
+    }
+
+    String moveBinToIf(final String binFile) {
+        String result = "";
+        String remoteFile = toolPath + "/" + binFile;
+        String checkMsg = checkFile(remoteFile);
+        if (!checkMsg.isEmpty()) {
+            String localFile = ConfigManager.CONFIG_DIR + File.separator + "bin" + File.separator + binFile;
+            if ((new File(localFile)).isFile()) {
+                if (!moveFileTo(localFile, remoteFile)) {
+                    result += (checkMsg + " and cannot transfer file '" + localFile +"'<br>");
+                }
+            } else {
+                result += (checkMsg + " and cannot find file '" + localFile +"'<br>");
+            }
+        }
+        //Make executable
+        runCommand("chmod +x " + remoteFile);
         return result;
     }
 

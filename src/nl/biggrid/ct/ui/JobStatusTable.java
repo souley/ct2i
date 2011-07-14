@@ -158,7 +158,7 @@ public class JobStatusTable extends JTable {
                 if (runManager.getJobIds().contains(Integer.valueOf(jobInfos[i].getId()))) {
                     int jobid = jobInfos[i].getId();
                     jsMap.put(Integer.toString(jobid), jobInfos[i].getStatus());
-                    if (RunUtil.RUN_DONE_MSG.equalsIgnoreCase(jobInfos[i].getStatus())) {
+                    if (RunUtil.RUN_DONE_MSG.equalsIgnoreCase(jobInfos[i].getStatus()) && runManager.isDownloadResults()) {
                         boolean jobTransferred = trasferDone.contains(Integer.valueOf(jobInfos[i].getId()));
                         if (!jobTransferred) {
                             boolean isTransferred = FileTransferManager.instance().fetchResults(runManager.getJobPath(jobid));

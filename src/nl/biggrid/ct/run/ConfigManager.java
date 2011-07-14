@@ -23,6 +23,7 @@ import org.apache.commons.configuration.XMLConfiguration;
  * @author souley
  */
 public class ConfigManager {
+    public static final String CONFIG_DIR = System.getProperty("user.dir") + File.separator + "config" + File.separator;
     static final String CONFIG_FILE = "config.xml";
     static final String DEFAULT_CONFIG_FILE = "defaultsettings.xml";
     static final String CURRENT_DIR = System.getProperty("user.dir");

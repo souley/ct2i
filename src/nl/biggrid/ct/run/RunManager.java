@@ -20,7 +20,7 @@ import nl.biggrid.ct.util.MessageBox;
 
 public class RunManager {
     public static final int CMD_FAILED = -1;
-    public static final String PBS_JOB_SCRIPT = "pbs_jobsccript.sh";
+    public static final String PBS_JOB_SCRIPT = "pbs_jobscript.sh";
     public static final String SGE_JOB_SCRIPT = "sge_jobscript.sh";
     public static final String LSF_JOB_SCRIPT = "lsf_jobscript.sh";
     public static final String PBS_TEST_CMD   = "pbsnodes -l all";
@@ -54,6 +54,7 @@ public class RunManager {
     private Vector<Integer> abortedJobs = new Vector<Integer>(); 
     private String logFile = "";
     private String errFile = "";
+    private boolean downloadResults = false;
 
     protected RunManager() {
     }
@@ -104,6 +105,11 @@ public class RunManager {
                 }
             }
         }
+        downloadResults = ("yes".equalsIgnoreCase(ConfigManager.instance().getString("application.downloadresults")));
+    }
+
+    public boolean isDownloadResults() {
+        return downloadResults;
     }
 
     public IRunner getRunner() {

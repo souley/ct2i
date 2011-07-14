@@ -64,9 +64,6 @@ public class FileTransferManager {
                 new SSH2SCP1Client(new File(System.getProperty("user.dir")),
                                    client.getConnection(), System.err, false);
 
-            //srcFile = srcFile.replace(File.separatorChar, '/');
-            //dstFile = dstFile.replace(File.separatorChar, '/');
-
             SSHSCP1 scp = scpClient.scp1();
 
             if (dir.equalsIgnoreCase("to")) {
@@ -101,9 +98,29 @@ public class FileTransferManager {
         return true;
     }
 
+//    public boolean fetchResults(final String pathFrom) {
+//        String outputName = ConfigManager.instance().getString("omnimatch.output.value");
+//        String dstDir = ConfigManager.instance().getString("application.transferbuffer");
+//        String[] files = new String[]{".ccf", ".ang"};
+//        for (String file : files) {
+//            String filename = outputName + file;
+//            String remoteFile = pathFrom + "/" + filename;
+//            String localFile = dstDir + File.separator + filename;
+//            if (!moveFrom(remoteFile, localFile)) {
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
     public boolean fetchResults(final String pathFrom) {
+        String dirName = pathFrom.substring(pathFrom.lastIndexOf("/")+1);
         String outputName = ConfigManager.instance().getString("omnimatch.output.value");
-        String dstDir = ConfigManager.instance().getString("application.inbuffer");
+        String dstDir = ConfigManager.instance().getString("application.transferbuffer");
+        dstDir += (File.separator+dirName);
+        if (!(new File(dstDir)).mkdirs()) {
+            System.out.println("Cannot create directory '" + dstDir + "'");
+            return false;
+        }
         String[] files = new String[]{".ccf", ".ang"};
         for (String file : files) {
             String filename = outputName + file;
@@ -112,6 +129,10 @@ public class FileTransferManager {
             if (!moveFrom(remoteFile, localFile)) {
                 return false;
             }
+        }
+        final String summary = "summary.xml";
+        if (!moveFrom(pathFrom + "/" + summary, dstDir + File.separator + summary)) {
+            return false;
         }
         return true;
     }

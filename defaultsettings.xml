@@ -9,17 +9,18 @@
 <ct2i>
     <application>
         <runmode>user</runmode>
-        <outbuffer>.ct2i\\data</outbuffer>
-        <inbuffer>.ct2i\\data</inbuffer>
+        <downloadresults>yes</downloadresults>
+        <transferbuffer>.ct2i\\data</transferbuffer>
     </application>
     <cluster>
         <errorfile>test.err</errorfile>
-        <binarypath>/home/souley/omnimatch/bin</binarypath>
+        <installpath>/home/souley/omnimatch</installpath>
+        <binarypath>bin</binarypath>
         <hostname>lisa.sara.nl</hostname>
-        <outputpath>/home/souley/omnimatch/output</outputpath>
+        <outputpath>output</outputpath>
         <walltime>00:05:00</walltime>
         <user>souley</user>
-        <inputpath>/home/souley/omnimatch/input</inputpath>
+        <inputpath>input</inputpath>
         <gpusorcpus>1</gpusorcpus>
         <logfile>test.log</logfile>
         <nodes>2</nodes>

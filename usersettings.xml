@@ -1,3 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<configuration></configuration>
+<configuration>
+    <omnimatch>
+        <tomogram file="testvol.em"/>
+    </omnimatch>
+</configuration>
